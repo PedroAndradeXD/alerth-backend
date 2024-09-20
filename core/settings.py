@@ -34,6 +34,7 @@ INSTALLED_APPS = [
     # Dependencies apps
     "daphne",
     'channels',
+    'drf_yasg',
     'rest_framework',
     'django.contrib.admin',
     'django.contrib.auth',
