@@ -4,7 +4,7 @@ from .models import Event, Client, ClientEvent, Item, Purchase
 # Serializer para o modelo Client
 class ClientSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Client # Associando o serializer ao modelo
+        model = Client # Associa o serializer ao modelo
         fields = ['client id', 'name', 'email', 'password', 'total exp', 'created at', 'updated at'] #campos que serão incluídos na serialização
 
 # Serializer para o modelo Event
