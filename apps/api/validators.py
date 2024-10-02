@@ -37,7 +37,7 @@ class EventSerializer(serializers.ModelSerializer):
 
     def validate_urgency(self, value):
         if not (1 <= value <= 5):
-            raise serializers.ValidationError("A urgência deve estar entre 1 e 5.")
+            raise serializers.ValidationError("A urgência deve estar entre a escala de 1 a 5.")
         return value
 
 
@@ -89,6 +89,6 @@ class PurchaseSerializer(serializers.ModelSerializer):
         item = data.get('item_id')
 
         if client.total_exp < item.value:
-            raise serializers.ValidationError("O cliente não possui experiência o suficiente.")
+            raise serializers.ValidationError(" Experiência insuficiente.")
         
         return data
