@@ -82,7 +82,10 @@ ASGI_APPLICATION = "core.asgi.application"
 
 CHANNEL_LAYERS = {
     'default': {
-        'BACKEND': 'channels.layers.InMemoryChannelLayer',
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("127.0.0.1", 6379)],
+        },
     },
 }
 
@@ -146,14 +149,7 @@ USE_TZ = True
 
 # Define o caminho para o diretório 'static' dentro do projeto
 STATIC_URL = '/static/'
-
-# Diretório onde os arquivos estáticos serão coletados após a execução do comando 'collectstatic'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-
-# Lista de diretórios onde o Django buscará arquivos estáticos adicionais
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static'),
-]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
