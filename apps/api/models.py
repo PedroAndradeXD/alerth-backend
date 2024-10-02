@@ -14,21 +14,33 @@ class Client(models.Model):
 
     def __str__(self):
         return self.name  # Facilita a leitura do objeto no admin
-    
+
     def set_password(self, raw_password):
-        self.password = make_password(raw_password)  # Transforma a senha em um hash
+        # Transforma a senha em um hash
+        self.password = make_password(raw_password)
 
     def check_password(self, raw_password):
-        return check_password(raw_password, self.password)  # Compara a senha do usuário com o hash
+        # Compara a senha do usuário com o hash
+        return check_password(raw_password, self.password)
 
 
 class Event(models.Model):
     event_id = models.UUIDField(primary_key=True, default=uuid4)
-    lat = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
-    lng = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    lat = models.DecimalField(
+        max_digits=9,
+        decimal_places=6,
+        null=True,
+        blank=True
+    )
+    lng = models.DecimalField(
+        max_digits=9,
+        decimal_places=6,
+        null=True,
+        blank=True
+    )
     category = models.CharField(max_length=70)
     urgency = models.PositiveIntegerField()
-    exp_acquired = models.PositiveIntegerField()  # Corrigido o nome para "exp_acquired"
+    exp_acquired = models.PositiveIntegerField()
     reports_number = models.PositiveIntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

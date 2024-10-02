@@ -1,32 +1,70 @@
 from rest_framework import serializers
-from .models import Event, Client, ClientEvent, Item, Purchase
+from .models import Client, Event, ClientEvent, Item, Purchase
 
-# Serializer para o modelo Client
+
 class ClientSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Client # Associa o serializer ao modelo
-        fields = ['client id', 'name', 'email', 'password', 'total exp', 'created at', 'updated at'] #campos que serão incluídos na serialização
+        model = Client
+        fields = ['client_id',
+                  'name',
+                  'email',
+                  'total_exp',
+                  'created_at',
+                  'updated_at']
+        read_only_fields = ['client_id', 'created_at', 'updated_at']
 
-# Serializer para o modelo Event
+
 class EventSerializer(serializers.ModelSerializer):
     class Meta:
         model = Event
-        fields = ['event id', 'lat', 'lng', 'category', 'urgency', 'exp acquired', 'reports number', 'created at', 'updated at', 'tittle', 'description', 'location', 'date', 'user']
+        fields = ['event_id',
+                  'lat',
+                  'lng',
+                  'category',
+                  'urgency',
+                  'exp_acquired',
+                  'reports_number',
+                  'created_at',
+                  'updated_at']
+        read_only_fields = ['event_id', 'created_at', 'updated_at']
 
-# Serializer para o modelo ClientEvent
+
 class ClientEventSerializer(serializers.ModelSerializer):
+    client_id = ClientSerializer(read_only=True)
+    event_id = EventSerializer(read_only=True)
+
     class Meta:
         model = ClientEvent
-        fields = ['client id', 'event id', 'created at', 'updated at']
+        fields = ['client_id',
+                  'event_id',
+                  'created_at',
+                  'updated_at']
+        read_only_fields = ['created_at', 'updated_at']
 
-# Serializer para o modelo Item
+
 class ItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = Item
-        fields = ['item id', 'type', 'value', 'title', 'description', 'created at', 'updated at']
+        fields = ['item_id',
+                  'type',
+                  'value',
+                  'title',
+                  'description',
+                  'created_at',
+                  'updated_at']
+        read_only_fields = ['item_id', 'created_at', 'updated_at']
 
-# Serializer para o modelo Purchase
+
 class PurchaseSerializer(serializers.ModelSerializer):
+    client_id = ClientSerializer(read_only=True)
+    item_id = ItemSerializer(read_only=True)
+
     class Meta:
         model = Purchase
-        fields = ['purchase id', 'client id', 'item id' 'created at', 'updated at']
+        fields = ['purchase_id',
+                  'client_id',
+                  'item_id',
+                  'created_at',
+                  'updated_at']
+
+        read_only_fields = ['purchase_id', 'created_at', 'updated_at']

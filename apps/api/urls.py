@@ -1,13 +1,16 @@
-from django.urls import path
-from django.http import HttpResponse
-from . import views
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+from .viewsets import ClientViewSet, EventViewSet, ClientEventViewSet, ItemViewSet, PurchaseViewSet
 
+# Criando o router e registrando os viewsets
+router = DefaultRouter()
+router.register(r'clients', ClientViewSet)
+router.register(r'events', EventViewSet)
+router.register(r'client-events', ClientEventViewSet)
+router.register(r'items', ItemViewSet)
+router.register(r'purchases', PurchaseViewSet)
 
-def returnResponde(request):
-    return HttpResponse('Olá')
-
-
-# Definindo as URLs
+# Adicionando as URLs do router
 urlpatterns = [
-    path('endpoint/', returnResponde, name='apps'),
+    path('', include(router.urls)),
 ]
