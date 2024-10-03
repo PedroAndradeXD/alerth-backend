@@ -1,8 +1,13 @@
 from rest_framework import serializers
-from .models import Client, Event, ClientEvent, Item, Purchase
+from .models import Client, Event, ClientEvent, Item, Purchase, ServiceEntity, ServiceCategory, EntityCategory
 from django.core.exceptions import ValidationError
 from django.core.validators import EmailValidator
 
+
+def validate_name(value):
+    if len(value) < 3:
+        raise serializers.ValidationError("O nome deve conter pelo menos 3 caracteres.")
+    return value
 
 class ClientSerializer(serializers.ModelSerializer):
     class Meta:
@@ -91,4 +96,37 @@ class PurchaseSerializer(serializers.ModelSerializer):
         if client.total_exp < item.value:
             raise serializers.ValidationError(" Experiência insuficiente.")
         
+        return data
+
+class ServiceEntitySerializer(serializers.ModelSerializer):
+    name = serializers.CharField(validators=[validate_name])
+
+    class Meta:
+        model = ServiceEntity
+        fields = ['serviceEntity_id', 'name', 'created_at']
+        read_only_fields = ['serviceEntity_id', 'created_at']
+
+
+class ServiceCategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ServiceCategory
+        fields = ['serviceCategory_id', 'category', 'created_at']
+        read_only_fields = ['serviceCategory_id', 'created_at']
+
+
+    def validate_category(self, value):
+        if ServiceCategory.objects.filter(category=value).exists():
+            raise serializers.ValidationError("Essa categoria já existe.")
+        return value
+
+
+class EntityCategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = EntityCategory
+        fields = ['entityCategory_id', 'serviceEntity_id', 'serviceCategory_id', 'created_at']
+        read_only_fields = ['entityCategory_id', 'created_at']
+
+def validate(self, data):
+        if EntityCategory.objects.filter(serviceEntity_id=data['serviceEntity_id'], serviceCategory_id=data['serviceCategory_id']).exists():
+            raise serializers.ValidationError("Essa combinação de entidade e categoria já existe.")
         return data

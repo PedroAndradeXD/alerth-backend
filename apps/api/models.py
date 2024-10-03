@@ -81,3 +81,34 @@ class Purchase(models.Model):
 
     def __str__(self):
         return f'{self.client.name} - {self.item.title}'
+
+
+class ServiceEntity(models.Model):
+    serviceEntity_id = models.UUIDField (primary_key=True, default=uuid4)
+    name = models.CharField(max_length=70)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.name 
+
+
+class ServiceCategory(models.Model):
+    serviceCategory_id = models.UUIDField (primary_key=True, default=uuid4)
+    category = models.CharField(max_length=70)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.category
+
+
+class EntityCategory(models.Model):
+    entityCategory_id = models.UUIDField (primary_key=True, default=uuid4)
+    serviceEntity_id = models.ForeignKey(ServiceEntity, on_delete=models.CASCADE)
+    serviceCategory_id = models.ForeignKey(ServiceCategory, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'{self.serviceEntity_id.name} - {self.serviceCategory_id.category}'
+
+
+

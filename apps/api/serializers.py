@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Client, Event, ClientEvent, Item, Purchase
+from .models import Client, Event, ClientEvent, Item, Purchase, ServiceCategory, ServiceEntity, EntityCategory
 
 
 class ClientSerializer(serializers.ModelSerializer):
@@ -68,3 +68,34 @@ class PurchaseSerializer(serializers.ModelSerializer):
                   'updated_at']
 
         read_only_fields = ['purchase_id', 'created_at', 'updated_at']
+
+
+class ServiceEntitySerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = ServiceEntity
+        fields = ['serviceEntity_id', 
+                  'name', 
+                  'created_at']
+
+        
+
+class ServiceCategorySerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = ServiceCategory
+        fields = ['serviceCategory_id', 
+                  'category', 
+                  'created_at']
+
+
+class EntityCategorySerializer(serializers.ModelSerializer):
+    serviceEntity = ServiceEntitySerializer(read_only=True) 
+    serviceCategory = ServiceCategorySerializer(read_only=True) 
+
+    class Meta:
+        model = EntityCategory
+        fields = ['entityCategory_id', 
+                  'serviceEntity', 
+                  'serviceCategory', 
+                  'created_at']
