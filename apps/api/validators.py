@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Client, Event, ClientEvent, Item, Purchase, ServiceEntity, ServiceCategory, EntityCategory
+from .models import Client, Event, ClientEvent, Item, Purchase, ServiceEntity, ServiceCategory, EntityCategory, Comments
 from django.core.exceptions import ValidationError
 from django.core.validators import EmailValidator
 
@@ -130,3 +130,18 @@ def validate(self, data):
         if EntityCategory.objects.filter(serviceEntity_id=data['serviceEntity_id'], serviceCategory_id=data['serviceCategory_id']).exists():
             raise serializers.ValidationError("Essa combinação de entidade e categoria já existe.")
         return data
+
+
+class CommentsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Comments
+        fields = ['comment_id', 'client_id', 'event_id', 'comment']
+
+    def validate_comment(self, value):
+        
+        palavras_proibidas = ['spam']
+
+        
+        for palavra in palavras_proibidas:
+            if palavra in value.lower():
+                raise serializers.ValidationError(f"A palavra '{palavra}' não é permitida no comentário.")
