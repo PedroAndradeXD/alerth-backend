@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Client, Event, ClientEvent, Item, Purchase, ServiceCategory, ServiceEntity, EntityCategory
+from .models import Client, Event, ClientEvent, Item, Purchase, ServiceCategory, ServiceEntity, EntityCategory, Comments
 
 
 class ClientSerializer(serializers.ModelSerializer):
@@ -99,3 +99,12 @@ class EntityCategorySerializer(serializers.ModelSerializer):
                   'serviceEntity', 
                   'serviceCategory', 
                   'created_at']
+
+
+class CommentsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Comments
+        fields = ['comment_id', 
+                  'client_id', 
+                  'event_id', 
+                  'comment']
