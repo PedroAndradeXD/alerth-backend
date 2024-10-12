@@ -12,9 +12,7 @@ class ClientAdmin(admin.ModelAdmin):
 
 
 class EventAdmin(admin.ModelAdmin):
-    list_display = ['category',
-                    'urgency',
-                    'exp_acquired',
+    list_display = ['service_category',
                     'reports_number',
                     'created_at',
                     'updated_at']
