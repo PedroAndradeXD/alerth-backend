@@ -139,10 +139,10 @@ class EntityCategorySerializer(serializers.ModelSerializer):
                   'serviceCategory_id', 'created_at']
         read_only_fields = ['entityCategory_id', 'created_at']
 
-
-def validate(self, data):
+    def validate(self, data):
         if EntityCategory.objects.filter(serviceEntity_id=data['serviceEntity_id'], serviceCategory_id=data['serviceCategory_id']).exists():
-            raise serializers.ValidationError("Essa combinação de entidade e categoria já existe.")
+            raise serializers.ValidationError(
+                "Essa combinação de entidade e categoria já existe.")
         return data
 
 
@@ -151,16 +151,16 @@ class CommentsSerializer(serializers.ModelSerializer):
         model = Comments
         fields = ['comment_id', 'client_id', 'event_id', 'comment']
 
-    def validate_comment(self, value):
-        
+    def validate_comment(self, data, value):
+
         palavras_proibidas = ['spam']
 
-        
         for palavra in palavras_proibidas:
             if palavra in value.lower():
-                raise serializers.ValidationError(f"A palavra '{palavra}' não é permitida no comentário.")
+                raise serializers.ValidationError(
+                    f"A palavra '{palavra}' não é permitida no comentário.")
 
-    if EntityCategory.objects.filter(serviceEntity_id=data['serviceEntity_id'], serviceCategory_id=data['serviceCategory_id']).exists():
-        raise serializers.ValidationError(
-            "Essa combinação de entidade e categoria já existe.")
-    return data
+        if EntityCategory.objects.filter(serviceEntity_id=data['serviceEntity_id'], serviceCategory_id=data['serviceCategory_id']).exists():
+            raise serializers.ValidationError(
+                "Essa combinação de entidade e categoria já existe.")
+        return data
