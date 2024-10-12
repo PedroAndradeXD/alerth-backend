@@ -21,8 +21,6 @@ class EventSerializer(serializers.ModelSerializer):
                   'lat',
                   'lng',
                   'category',
-                  'urgency',
-                  'exp_acquired',
                   'reports_number',
                   'created_at',
                   'updated_at']
@@ -71,31 +69,30 @@ class PurchaseSerializer(serializers.ModelSerializer):
 
 
 class ServiceEntitySerializer(serializers.ModelSerializer):
-    
+
     class Meta:
         model = ServiceEntity
-        fields = ['serviceEntity_id', 
-                  'name', 
+        fields = ['servic_entity_id',
+                  'name',
                   'created_at']
 
-        
 
 class ServiceCategorySerializer(serializers.ModelSerializer):
-    
+
     class Meta:
         model = ServiceCategory
-        fields = ['serviceCategory_id', 
-                  'category', 
+        fields = ['serviceCategory_id',
+                  'category',
                   'created_at']
 
 
 class EntityCategorySerializer(serializers.ModelSerializer):
-    serviceEntity = ServiceEntitySerializer(read_only=True) 
-    serviceCategory = ServiceCategorySerializer(read_only=True) 
+    serviceEntity = ServiceEntitySerializer(read_only=True)
+    serviceCategory = ServiceCategorySerializer(read_only=True)
 
     class Meta:
         model = EntityCategory
-        fields = ['entityCategory_id', 
-                  'serviceEntity', 
-                  'serviceCategory', 
+        fields = ['entityCategory_id',
+                  'serviceEntity',
+                  'serviceCategory',
                   'created_at']
