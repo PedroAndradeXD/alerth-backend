@@ -38,6 +38,13 @@ class ClientSerializer(serializers.ModelSerializer):
         if Client.objects.filter(email=value).exists():
             raise serializers.ValidationError("Este email já está em uso.")
         return value
+    
+    def validate_name(value):
+        if len(value) < 3:
+            raise serializers.ValidationError(
+            "O nome deve conter pelo menos 3 caracteres.")
+        return value
+
 
 #Event 
 
@@ -198,6 +205,14 @@ class ServiceEntitySerializer(serializers.ModelSerializer):
         model = ServiceEntity
         fields = ['serviceEntity_id', 'name', 'created_at']
         read_only_fields = ['serviceEntity_id', 'created_at']
+
+    def validate_name(value):
+        if len(value) < 3:
+            raise serializers.ValidationError(
+            "O nome deve conter pelo menos 3 caracteres.")
+        return value
+    
+    
 
 
 #ServiceCategory
