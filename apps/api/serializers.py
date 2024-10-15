@@ -3,16 +3,7 @@ from .models import Client, Event, ClientEvent, Item, Purchase, ServiceCategory,
 from django.core.exceptions import ValidationError
 from django.core.validators import EmailValidator
 
-# Validator Name
-
-def validate_name(value):
-    if len(value) < 3:
-        raise serializers.ValidationError(
-            "O nome deve conter pelo menos 3 caracteres.")
-    return value
-
 # Client
-
 class ClientSerializer(serializers.ModelSerializer):
     class Meta:
         model = Client
