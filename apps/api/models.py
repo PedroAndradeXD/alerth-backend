@@ -115,11 +115,13 @@ class EntityCategory(models.Model):
         return f'{self.serviceEntity_id.name} - {self.serviceCategory_id.category}'
 
 
-class Comments(models.Model):
+class Comment(models.Model):
     comment_id = models.UUIDField(primary_key=True, default=uuid4)
     client = models.ForeignKey(Client, on_delete=models.CASCADE)
-    event_id = models.ForeignKey(Event, on_delete=models.CASCADE)
+    event = models.ForeignKey(Event, on_delete=models.CASCADE)
     comment = models.CharField(max_length=500)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.comment

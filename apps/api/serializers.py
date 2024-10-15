@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Client, Event, ClientEvent, Item, Purchase, ServiceCategory, ServiceEntity, EntityCategory, Comments
+from .models import Client, Event, ClientEvent, Item, Purchase, ServiceCategory, ServiceEntity, EntityCategory, Comment
 from .validators import EmailValidator, PositiveValueValidator, ClientNameValidator
 
 
@@ -20,7 +20,7 @@ class EventSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Event
-        fields = ['event_id', 'lat', 'lng',
+        fields = ['event', 'lat', 'lng',
                   'reports_number', 'created_at', 'updated_at']
         read_only_fields = ['event_id', 'created_at', 'updated_at']
 
@@ -93,5 +93,5 @@ class EntityCategorySerializer(serializers.ModelSerializer):
 
 class CommentsSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Comments
+        model = Comment
         fields = ['comment_id', 'client', 'event', 'comment']
