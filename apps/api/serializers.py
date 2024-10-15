@@ -1,185 +1,64 @@
 from rest_framework import serializers
 from .models import Client, Event, ClientEvent, Item, Purchase, ServiceCategory, ServiceEntity, EntityCategory, Comments
-from django.core.exceptions import ValidationError
-from django.core.validators import EmailValidator
-
-# Client
-class ClientSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Client
-        fields = ['client_id',
-                  'name',
-                  'email',
-                  'total_exp',
-                  'created_at',
-                  'updated_at']
-        read_only_fields = ['client_id', 'created_at', 'updated_at']
+from .validators import EmailValidator, PositiveValueValidator, ClientNameValidator
 
 
 class ClientSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(validators=[EmailValidator()])
+    name = serializers.CharField(validators=[ClientNameValidator()])
+
     class Meta:
         model = Client
         fields = ['client_id', 'name', 'email',
                   'total_exp', 'created_at', 'updated_at']
         read_only_fields = ['client_id', 'created_at', 'updated_at']
 
-    def validate_email(self, value):
-        EmailValidator()(value)
-
-        if Client.objects.filter(email=value).exists():
-            raise serializers.ValidationError("Este email já está em uso.")
-        return value
-    
-    def validate_name(value):
-        if len(value) < 3:
-            raise serializers.ValidationError(
-            "O nome deve conter pelo menos 3 caracteres.")
-        return value
-
-
-#Event 
 
 class EventSerializer(serializers.ModelSerializer):
+    lat = serializers.FloatField()
+    lng = serializers.FloatField()
+
     class Meta:
         model = Event
-        fields = ['event_id',
-                  'lat',
-                  'lng',
-                  'category',
-                  'reports_number',
-                  'created_at',
-                  'updated_at']
+        fields = ['event_id', 'lat', 'lng',
+                  'reports_number', 'created_at', 'updated_at']
         read_only_fields = ['event_id', 'created_at', 'updated_at']
-
-class EventSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Event
-        fields = ['event_id', 'lat', 'lng', 'category', 'urgency',
-                  'exp_acquired', 'reports_number', 'created_at', 'updated_at']
-        read_only_fields = ['event_id', 'created_at', 'updated_at']
-
-    def validate_lat(self, value):
-        if not (-90 <= value <= 90):
-            raise serializers.ValidationError(
-                "A latitude deve estar entre -90 e 90 graus.")
-        return value
-
-    def validate_lng(self, value):
-        if not (-180 <= value <= 180):
-            raise serializers.ValidationError(
-                "A longitude deve estar entre -180 e 180 graus.")
-        return value
-
-    def validate_urgency(self, value):
-        if not (1 <= value <= 5):
-            raise serializers.ValidationError(
-                "A urgência deve estar entre a escala de 1 a 5.")
-        return value
-
-#ClientEvent
 
 
 class ClientEventSerializer(serializers.ModelSerializer):
-    client_id = ClientSerializer(read_only=True)
-    event_id = EventSerializer(read_only=True)
+    client = ClientSerializer(read_only=True)
+    event = EventSerializer(read_only=True)
 
     class Meta:
         model = ClientEvent
-        fields = ['client_id',
-                  'event_id',
+        fields = ['client_event_id'
+                  'client',
+                  'event',
                   'created_at',
                   'updated_at']
-        read_only_fields = ['created_at', 'updated_at']
+        read_only_fields = ['client_event_id', 'created_at', 'updated_at']
 
-class ClientEventSerializer(serializers.ModelSerializer):
-    client_id = serializers.PrimaryKeyRelatedField(
-        queryset=Client.objects.all())
-    event_id = serializers.PrimaryKeyRelatedField(queryset=Event.objects.all())
-
-    class Meta:
-        model = ClientEvent
-        fields = ['client_id', 'event_id', 'created_at', 'updated_at']
-        read_only_fields = ['created_at', 'updated_at']
-
-    def validate(self, data):
-        client = data.get('client_id')
-        event = data.get('event_id')
-
-        if not client or not event:
-            raise serializers.ValidationError("Cliente ou evento inválido.")
-
-        if ClientEvent.objects.filter(client_id=client, event_id=event).exists():
-            raise serializers.ValidationError(
-                "Este cliente já está associado a este evento.")
-
-        return data
-
-#Item
 
 class ItemSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Item
-        fields = ['item_id',
-                  'type',
-                  'value',
-                  'title',
-                  'description',
-                  'created_at',
-                  'updated_at']
-        read_only_fields = ['item_id', 'created_at', 'updated_at']
+    value = serializers.FloatField(validators=[PositiveValueValidator()])
 
-class ItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = Item
         fields = ['item_id', 'type', 'value', 'title',
                   'description', 'created_at', 'updated_at']
         read_only_fields = ['item_id', 'created_at', 'updated_at']
 
-    def validate_value(self, value):
-        if value <= 0:
-            raise serializers.ValidationError(
-                "O valor do item deve ser positivo.")
-        return value
-
-
-#Purchase
 
 class PurchaseSerializer(serializers.ModelSerializer):
-    client_id = ClientSerializer(read_only=True)
-    item_id = ItemSerializer(read_only=True)
+    client = ClientSerializer(read_only=True)
+    item = ItemSerializer(read_only=True)
 
     class Meta:
         model = Purchase
-        fields = ['purchase_id',
-                  'client_id',
-                  'item_id',
-                  'created_at',
-                  'updated_at']
-
-        read_only_fields = ['purchase_id', 'created_at', 'updated_at']
-    
-class PurchaseSerializer(serializers.ModelSerializer):
-    client_id = serializers.PrimaryKeyRelatedField(
-        queryset=Client.objects.all())
-    item_id = serializers.PrimaryKeyRelatedField(queryset=Item.objects.all())
-
-    class Meta:
-        model = Purchase
-        fields = ['purchase_id', 'client_id',
-                  'item_id', 'created_at', 'updated_at']
+        fields = ['purchase_id', 'client',
+                  'item', 'created_at', 'updated_at']
         read_only_fields = ['purchase_id', 'created_at', 'updated_at']
 
-    def validate(self, data):
-        client = data.get('client_id')
-        item = data.get('item_id')
-
-        if client.total_exp < item.value:
-            raise serializers.ValidationError(" Experiência insuficiente.")
-
-        return data
-
-
-#ServiceEntity
 
 class ServiceEntitySerializer(serializers.ModelSerializer):
 
@@ -189,24 +68,6 @@ class ServiceEntitySerializer(serializers.ModelSerializer):
                   'name',
                   'created_at']
 
-class ServiceEntitySerializer(serializers.ModelSerializer):
-    name = serializers.CharField(validators=[validate_name])
-
-    class Meta:
-        model = ServiceEntity
-        fields = ['serviceEntity_id', 'name', 'created_at']
-        read_only_fields = ['serviceEntity_id', 'created_at']
-
-    def validate_name(value):
-        if len(value) < 3:
-            raise serializers.ValidationError(
-            "O nome deve conter pelo menos 3 caracteres.")
-        return value
-    
-    
-
-
-#ServiceCategory
 
 class ServiceCategorySerializer(serializers.ModelSerializer):
 
@@ -216,68 +77,21 @@ class ServiceCategorySerializer(serializers.ModelSerializer):
                   'category',
                   'created_at']
 
-class ServiceCategorySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ServiceCategory
-        fields = ['serviceCategory_id', 'category', 'created_at']
-        read_only_fields = ['serviceCategory_id', 'created_at']
-
-    def validate_category(self, value):
-        if ServiceCategory.objects.filter(category=value).exists():
-            raise serializers.ValidationError("Essa categoria já existe.")
-        return value
-
-#EntetyCategory
 
 class EntityCategorySerializer(serializers.ModelSerializer):
-    serviceEntity = ServiceEntitySerializer(read_only=True)
-    serviceCategory = ServiceCategorySerializer(read_only=True)
+    service_entity = ServiceEntitySerializer(read_only=True)
+    service_category = ServiceCategorySerializer(read_only=True)
 
     class Meta:
         model = EntityCategory
-        fields = ['entityCategory_id',
-                  'serviceEntity',
-                  'serviceCategory',
-                  'created_at']
+        fields = ['entity_category_id',
+                  'service_entity',
+                  'service_category',
+                  'created_at',
+                  'exp_acquired']
 
-class EntityCategorySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = EntityCategory
-        fields = ['entityCategory_id', 'serviceEntity_id',
-                  'serviceCategory_id', 'created_at']
-        read_only_fields = ['entityCategory_id', 'created_at']
-
-    def validate(self, data):
-        if EntityCategory.objects.filter(serviceEntity_id=data['serviceEntity_id'], serviceCategory_id=data['serviceCategory_id']).exists():
-            raise serializers.ValidationError(
-                "Essa combinação de entidade e categoria já existe.")
-        return data
-
-#Comments 
 
 class CommentsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comments
-        fields = ['comment_id', 
-                  'client_id', 
-                  'event_id', 
-                  'comment']
-        
-class CommentsSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Comments
-        fields = ['comment_id', 'client_id', 'event_id', 'comment']
-
-    def validate_comment(self, data, value):
-
-        palavras_proibidas = ['spam']
-
-        for palavra in palavras_proibidas:
-            if palavra in value.lower():
-                raise serializers.ValidationError(
-                    f"A palavra '{palavra}' não é permitida no comentário.")
-
-        if EntityCategory.objects.filter(serviceEntity_id=data['serviceEntity_id'], serviceCategory_id=data['serviceCategory_id']).exists():
-            raise serializers.ValidationError(
-                "Essa combinação de entidade e categoria já existe.")
-        return data
+        fields = ['comment_id', 'client', 'event', 'comment']
