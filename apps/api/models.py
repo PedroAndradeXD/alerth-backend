@@ -8,7 +8,7 @@ class Client(models.Model):
     name = models.CharField(max_length=70)
     email = models.EmailField(max_length=70)
     password = models.CharField(max_length=128)
-    total_exp = models.PositiveIntegerField()
+    total_exp = models.PositiveIntegerField(null=True, blank=True, default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
