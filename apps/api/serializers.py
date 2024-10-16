@@ -1,70 +1,63 @@
 from rest_framework import serializers
-from .models import Client, Event, ClientEvent, Item, Purchase, ServiceCategory, ServiceEntity, EntityCategory, Comments
+from .models import Client, Event, ClientEvent, Item, Purchase, ServiceCategory, ServiceEntity, EntityCategory, Comment
+from .validators import EmailValidator, PositiveValueValidator, ClientNameValidator
 
 
 class ClientSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(validators=[EmailValidator()])
+    name = serializers.CharField(validators=[ClientNameValidator()])
+
     class Meta:
         model = Client
-        fields = ['client_id',
-                  'name',
-                  'email',
-                  'total_exp',
-                  'created_at',
-                  'updated_at']
+        fields = ['client_id', 'name', 'email',
+                  'total_exp', 'created_at', 'updated_at']
         read_only_fields = ['client_id', 'created_at', 'updated_at']
 
 
 class EventSerializer(serializers.ModelSerializer):
+    lat = serializers.FloatField()
+    lng = serializers.FloatField()
+
     class Meta:
         model = Event
-        fields = ['event_id',
-                  'lat',
-                  'lng',
-                  'category',
-                  'reports_number',
-                  'created_at',
-                  'updated_at']
+        fields = ['lat', 'lng',
+                  'reports_number', 'created_at', 'updated_at']
         read_only_fields = ['event_id', 'created_at', 'updated_at']
 
 
 class ClientEventSerializer(serializers.ModelSerializer):
-    client_id = ClientSerializer(read_only=True)
-    event_id = EventSerializer(read_only=True)
+    client = ClientSerializer(read_only=True)
+    event = EventSerializer(read_only=True)
 
     class Meta:
         model = ClientEvent
-        fields = ['client_id',
-                  'event_id',
+        fields = ['client_event_id',
+                  'client',
+                  'event',
                   'created_at',
                   'updated_at']
-        read_only_fields = ['created_at', 'updated_at']
+        read_only_fields = ['client', 'client_event_id',
+                            'created_at', 'updated_at']
 
 
 class ItemSerializer(serializers.ModelSerializer):
+    value = serializers.FloatField(validators=[PositiveValueValidator()])
+
     class Meta:
         model = Item
-        fields = ['item_id',
-                  'type',
-                  'value',
-                  'title',
-                  'description',
-                  'created_at',
-                  'updated_at']
+        fields = ['item_id', 'type', 'value', 'title',
+                  'description', 'created_at', 'updated_at']
         read_only_fields = ['item_id', 'created_at', 'updated_at']
 
 
 class PurchaseSerializer(serializers.ModelSerializer):
-    client_id = ClientSerializer(read_only=True)
-    item_id = ItemSerializer(read_only=True)
+    client = ClientSerializer(read_only=True)
+    item = ItemSerializer(read_only=True)
 
     class Meta:
         model = Purchase
-        fields = ['purchase_id',
-                  'client_id',
-                  'item_id',
-                  'created_at',
-                  'updated_at']
-
+        fields = ['purchase_id', 'client',
+                  'item', 'created_at', 'updated_at']
         read_only_fields = ['purchase_id', 'created_at', 'updated_at']
 
 
@@ -72,7 +65,7 @@ class ServiceEntitySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ServiceEntity
-        fields = ['servic_entity_id',
+        fields = ['service_entity_id',
                   'name',
                   'created_at']
 
@@ -81,27 +74,25 @@ class ServiceCategorySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ServiceCategory
-        fields = ['serviceCategory_id',
+        fields = ['service_category_id',
                   'category',
                   'created_at']
 
 
 class EntityCategorySerializer(serializers.ModelSerializer):
-    serviceEntity = ServiceEntitySerializer(read_only=True)
-    serviceCategory = ServiceCategorySerializer(read_only=True)
+    service_entity = ServiceEntitySerializer(read_only=True)
+    service_category = ServiceCategorySerializer(read_only=True)
 
     class Meta:
         model = EntityCategory
-        fields = ['entityCategory_id',
-                  'serviceEntity',
-                  'serviceCategory',
-                  'created_at']
+        fields = ['entity_category_id',
+                  'service_entity',
+                  'service_category',
+                  'created_at',
+                  'exp_acquired']
 
 
 class CommentsSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Comments
-        fields = ['comment_id', 
-                  'client_id', 
-                  'event_id', 
-                  'comment']
+        model = Comment
+        fields = ['comment_id', 'client', 'event', 'comment']

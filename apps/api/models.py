@@ -87,9 +87,6 @@ class Event(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    def __str__(self):
-        return self.category
-
 
 class ClientEvent(models.Model):
     client_event_id = models.UUIDField(primary_key=True, default=uuid4)
@@ -114,14 +111,14 @@ class EntityCategory(models.Model):
     def __str__(self):
         return f'{self.serviceEntity_id.name} - {self.serviceCategory_id.category}'
 
-class Comments(models.Model):
-    comment_id = models.UUIDField (primary_key=True, default=uuid4)
-    client_id = models.ForeignKey(Client, on_delete=models.CASCADE)
-    event_id = models.ForeignKey(Event, on_delete=models.CASCADE)
+
+class Comment(models.Model):
+    comment_id = models.UUIDField(primary_key=True, default=uuid4)
+    client = models.ForeignKey(Client, on_delete=models.CASCADE)
+    event = models.ForeignKey(Event, on_delete=models.CASCADE)
     comment = models.CharField(max_length=500)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.comment
-
-
-
