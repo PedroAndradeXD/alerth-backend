@@ -1,6 +1,6 @@
-from django.urls import path
-from .consumers import EventsConsumer
+from django.urls import re_path
+from .consumers import MapConsumer
 
 websocket_urlpatterns = [
-    path('ws/', EventsConsumer.as_asgi()),
+    re_path(r'ws/', MapConsumer.as_asgi()),
 ]

@@ -20,7 +20,7 @@ class EventSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Event
-        fields = ['event', 'lat', 'lng',
+        fields = ['lat', 'lng',
                   'reports_number', 'created_at', 'updated_at']
         read_only_fields = ['event_id', 'created_at', 'updated_at']
 
@@ -31,12 +31,13 @@ class ClientEventSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ClientEvent
-        fields = ['client_event_id'
+        fields = ['client_event_id',
                   'client',
                   'event',
                   'created_at',
                   'updated_at']
-        read_only_fields = ['client_event_id', 'created_at', 'updated_at']
+        read_only_fields = ['client', 'client_event_id',
+                            'created_at', 'updated_at']
 
 
 class ItemSerializer(serializers.ModelSerializer):
@@ -64,7 +65,7 @@ class ServiceEntitySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ServiceEntity
-        fields = ['servic_entity_id',
+        fields = ['service_entity_id',
                   'name',
                   'created_at']
 
@@ -73,7 +74,7 @@ class ServiceCategorySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ServiceCategory
-        fields = ['serviceCategory_id',
+        fields = ['service_category_id',
                   'category',
                   'created_at']
 
