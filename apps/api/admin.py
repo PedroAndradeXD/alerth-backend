@@ -12,6 +12,14 @@ class ClientAdmin(admin.ModelAdmin):
                     'updated_at']
     search_fields = ['name', 'email']
 
+    readonly_fields = ('client_id',)
+
+    def get_fields(self, request, obj=None):
+        fields = super().get_fields(request, obj)
+        if obj is None:
+            fields.remove('client_id')
+        return fields
+
 
 @admin.register(Event)
 class EventAdmin(admin.ModelAdmin):
@@ -20,7 +28,13 @@ class EventAdmin(admin.ModelAdmin):
                     'created_at',
                     'updated_at']
 
-    search_fields = ['category']
+    search_fields = ['event_id']
+
+    def get_fields(self, request, obj=None):
+        fields = super().get_fields(request, obj)
+        if obj is None:
+            fields.remove('event_id')
+        return fields
 
 
 @admin.register(ClientEvent)
@@ -30,6 +44,14 @@ class ClientEventAdmin(admin.ModelAdmin):
                     'created_at',
                     'updated_at']
     search_fields = ['client_id__name', 'event_id__category']
+
+    readonly_fields = ('client_event_id',)
+
+    def get_fields(self, request, obj=None):
+        fields = super().get_fields(request, obj)
+        if obj is None:
+            fields.remove('client_event_id')
+        return fields
 
 
 @admin.register(Item)
@@ -41,6 +63,14 @@ class ItemAdmin(admin.ModelAdmin):
                     'updated_at']
     search_fields = ['title', 'type']
 
+    readonly_fields = ('item_id',)
+
+    def get_fields(self, request, obj=None):
+        fields = super().get_fields(request, obj)
+        if obj is None:
+            fields.remove('item_id')
+        return fields
+
 
 @admin.register(Purchase)
 class PurchaseAdmin(admin.ModelAdmin):
@@ -51,16 +81,32 @@ class PurchaseAdmin(admin.ModelAdmin):
     search_fields = ['client_id__name', 'item_id__title']
     readonly_fields = ['purchase_id']
 
+    def get_fields(self, request, obj=None):
+        fields = super().get_fields(request, obj)
+        if obj is None:
+            fields.remove('purchase_id')
+        return fields
+
 
 @admin.register(EntityCategory)
 class EntityCategoryAdmin(admin.ModelAdmin):
     list_display = ('entity_category_id', 'service_entity_id',
                     'service_category_id', 'created_at')
+
     search_fields = ('service_entity_id__name',
                      'service_category_id__category')
+
     list_filter = ('created_at',)
     ordering = ('created_at',)
+
     readonly_fields = ('entity_category_id', 'created_at')
+
+    def get_fields(self, request, obj=None):
+        fields = super().get_fields(request, obj)
+        if obj is None:
+            fields.remove('created_at')
+            fields.remove('entity_category_id')
+        return fields
 
 
 @admin.register(ServiceCategory)
@@ -71,6 +117,12 @@ class ServiceCategoryAdmin(admin.ModelAdmin):
     ordering = ('created_at',)
     readonly_fields = ('service_category_id', 'created_at')
 
+    def get_fields(self, request, obj=None):
+        fields = super().get_fields(request, obj)
+        if obj is None:
+            fields.remove('service_category_id')
+        return fields
+
 
 @admin.register(ServiceEntity)
 class ServiceEntityAdmin(admin.ModelAdmin):
@@ -80,19 +132,24 @@ class ServiceEntityAdmin(admin.ModelAdmin):
     ordering = ('created_at',)
     readonly_fields = ('service_entity_id', 'created_at')
 
+    def get_fields(self, request, obj=None):
+        fields = super().get_fields(request, obj)
+        if obj is None:
+            fields.remove('service_entity_id')
+        return fields
+
 
 @admin.register(Comment)
 class CommentAdmin(admin.ModelAdmin):
-    list_display = ('comment_id', 'client',
-                    'event', 'comment', 'created_at')
-    search_fields = ('client__name', 'event__name', 'comment')
+    list_display = ('client', 'event', 'comment')
+    search_fields = ('client__name', 'event', 'comment')
     list_filter = ('created_at',)
     ordering = ('created_at',)
-    readonly_fields = ('comment_id', 'created_at')
 
-# admin.site.register(Item, ItemAdmin)
-# admin.site.register(Event, EventAdmin)
-# admin.site.register(Client, ClientAdmin)
-# admin.site.register(Purchase, PurchaseAdmin)
-# admin.site.register(Comments, CommentsAdmin)
-# admin.site.register(ClientEvent, ClientEventAdmin)
+    readonly_fields = ('comment_id',)
+
+    def get_fields(self, request, obj=None):
+        fields = super().get_fields(request, obj)
+        if obj is None:
+            fields.remove('comment_id')
+        return fields
