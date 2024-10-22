@@ -1,6 +1,8 @@
 from rest_framework import serializers
 from .models import Client, Event, ClientEvent, Item, Purchase, ServiceCategory, ServiceEntity, EntityCategory, Comment
 from .validators import EmailValidator, PositiveValueValidator, ClientNameValidator
+from django.contrib.auth.models import User
+from django.db.models import Q
 
 
 class ClientSerializer(serializers.ModelSerializer):
@@ -12,6 +14,31 @@ class ClientSerializer(serializers.ModelSerializer):
         fields = ['client_id', 'name', 'email',
                   'total_exp', 'created_at', 'updated_at']
         read_only_fields = ['client_id', 'created_at', 'updated_at']
+
+class ClientLoginSerializer(serializers.ModelSerializer):
+    email = serializers.CharField()
+    password = serializers.CharField(write_only=True)
+
+    class Meta:
+        model = User
+        fields = ['email', 'password']
+
+    def validate(self, data):
+        email = data['email']
+        password = data['password']
+        
+        # Verifica se o usuário existe com email ou username
+        try:
+            user = User.objects.get(Q(email__iexact=email) | Q(username__iexact=email))
+        except User.DoesNotExist:
+            raise serializers.ValidationError("Usuário não encontrado.")
+
+        # Verifica a senha
+        if not user.check_password(password):
+            raise serializers.ValidationError("Senha incorreta!")
+
+        # Retorna o objeto do usuário
+        return user
 
 
 class EventSerializer(serializers.ModelSerializer):

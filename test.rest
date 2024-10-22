@@ -1,0 +1,19 @@
+POST http://127.0.0.1:8000/api/login
+Content-Type: application/json
+
+{ "email": "pedrohl@gmail.com", "password": "Senha1234!" }
+
+###
+
+POST http://127.0.0.1:8000/api/signup
+Content-Type: application/json
+
+{ "name": "pedro", "password": "Senha1234!", "email": "pedrohl@gmail.com" }
+
+###
+
+GET http://127.0.0.1:8000/api/test_token
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzI5NjI1NTU2LCJpYXQiOjE3Mjk2MjUyNTYsImp0aSI6ImY0ZjdhYzgyMDRjMTRlZGU5ZjI1ODAyODJlMmJiNDAwIiwidXNlcl9pZCI6MjN9.yFhp8b8CX_JI2VFrpA8t2t_0_8TlLkomy4g6GhuW3As
+
+{}
