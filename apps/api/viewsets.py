@@ -2,10 +2,12 @@ from rest_framework import viewsets
 from .models import (Client, Event, ClientEvent,
                      Item, Purchase, EntityCategory)
 from .serializers import (ClientSerializer, EventSerializer,
-                          ClientEventSerializer, ItemSerializer, PurchaseSerializer, EntityCategorySerializer)
+                          ClientEventSerializer, ItemSerializer,
+                          PurchaseSerializer, EntityCategorySerializer)
 
 from .models import ServiceEntity, ServiceCategory, EntityCategory
-from .serializers import ServiceEntitySerializer, ServiceCategorySerializer, EntityCategorySerializer
+from .serializers import (ServiceEntitySerializer,
+                          ServiceCategorySerializer, EntityCategorySerializer)
 
 
 class ClientViewSet(viewsets.ModelViewSet):

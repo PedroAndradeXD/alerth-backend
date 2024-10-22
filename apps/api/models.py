@@ -1,6 +1,9 @@
 from uuid import uuid4
 from django.db import models
 from django.contrib.auth.hashers import make_password, check_password
+import re
+
+from .utils import load_blacklist
 
 
 class Client(models.Model):
@@ -13,14 +16,12 @@ class Client(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return self.name  # Facilita a leitura do objeto no admin
+        return self.name
 
     def set_password(self, raw_password):
-        # Transforma a senha em um hash
         self.password = make_password(raw_password)
 
     def check_password(self, raw_password):
-        # Compara a senha do usuário com o hash
         return check_password(raw_password, self.password)
 
 
@@ -87,6 +88,9 @@ class Event(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    def __str__(self):
+        return f"{self.service_category.category} - {self.reports_number} reports"
+
 
 class ClientEvent(models.Model):
     client_event_id = models.UUIDField(primary_key=True, default=uuid4)
@@ -109,7 +113,7 @@ class EntityCategory(models.Model):
     exp_acquired = models.PositiveIntegerField()
 
     def __str__(self):
-        return f'{self.serviceEntity_id.name} - {self.serviceCategory_id.category}'
+        return f'{self.service_entity.name} - {self.service_entity.category}'
 
 
 class Comment(models.Model):
@@ -119,6 +123,18 @@ class Comment(models.Model):
     comment = models.CharField(max_length=500)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    BLACKLIST = load_blacklist()
+
+    def clean_comment(self, comment):
+        for word in self.BLACKLIST:
+            comment = re.sub(rf'\b{word}\b', '*' *
+                             len(word), comment, flags=re.IGNORECASE)
+        return comment
+
+    def save(self, *args, **kwargs):
+        self.comment = self.clean_comment(self.comment)
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.comment
