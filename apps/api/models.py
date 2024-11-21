@@ -9,7 +9,7 @@ from .utils import load_blacklist
 class Client(models.Model):
     client_id = models.UUIDField(primary_key=True, default=uuid4)
     name = models.CharField(max_length=70)
-    email = models.EmailField(max_length=70)
+    email = models.EmailField(max_length=70, unique=True)
     password = models.CharField(max_length=128)
     total_exp = models.PositiveIntegerField(null=True, blank=True, default=0)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -68,24 +68,32 @@ class ServiceCategory(models.Model):
 
 
 class Event(models.Model):
+    CATEGORY_CHOICES = [
+        ('arvore_caida', 'Árvore Caída'),
+        ('alagamento', 'Alagamento'),
+        ('cano_quebrado', 'Cano Quebrado'),
+        ('semaforo_queimado', 'Semáforo Queimado'),
+        ('rua_sem_pavimentacao', 'Rua Sem Pavimentação'),
+        ('sem_agua', 'Sem Água'),
+        ('sem_energia', 'Sem Energia'),
+    ]
+
     event_id = models.UUIDField(primary_key=True, default=uuid4)
-    service_category = models.ForeignKey(
-        ServiceCategory, on_delete=models.CASCADE
+    service_category = models.CharField(
+        max_length=50,
+        choices=CATEGORY_CHOICES,
     )
-    lat = models.DecimalField(
-        max_digits=9,
-        decimal_places=6,
-    )
-    lng = models.DecimalField(
-        max_digits=9,
-        decimal_places=6,
-    )
+    client = models.ForeignKey(Client, on_delete=models.CASCADE, null=True)
+    description = models.CharField(max_length=256, null=True, blank=True)
+    lat = models.DecimalField(max_digits=9, decimal_places=6)
+    lng = models.DecimalField(max_digits=9, decimal_places=6)
     reports_number = models.PositiveIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"{self.service_category.category} - {self.reports_number} reports"
+        return f"{self.service_category} - {self.reports_number} reports"
+
 
 
 class ClientEvent(models.Model):

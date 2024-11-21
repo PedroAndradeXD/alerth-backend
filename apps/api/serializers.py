@@ -42,12 +42,10 @@ class ClientLoginSerializer(serializers.ModelSerializer):
 
 
 class EventSerializer(serializers.ModelSerializer):
-    lat = serializers.FloatField()
-    lng = serializers.FloatField()
 
     class Meta:
         model = Event
-        fields = ['lat', 'lng',
+        fields = ['service_category', 'description', 'lat', 'lng',
                   'reports_number', 'created_at', 'updated_at']
         read_only_fields = ['event_id', 'created_at', 'updated_at']
 
