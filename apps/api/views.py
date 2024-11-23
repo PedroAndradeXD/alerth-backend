@@ -3,7 +3,8 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework import permissions
 from rest_framework.response import Response
 
-from .serializers import ClientSerializer, ClientLoginSerializer, Client
+from .models import Event, ServiceCategory
+from .serializers import ClientSerializer, ClientLoginSerializer, Client, EventSerializer
 from rest_framework import status
 from django.contrib.auth.models import User
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -65,6 +66,9 @@ def signup(request):
         name=name, 
         email=email)
     
+    user.client = client
+    user.save()
+
     # Gerando tokens para o novo usuário
     tokens = get_tokens_for_user(user)
 
@@ -86,3 +90,30 @@ from rest_framework.response import Response
 @permission_classes([IsAuthenticated]) 
 def test_token(request):
     return Response({"message": "Acesso liberado para {}".format(request.user.email)})
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def create_event(request):
+    client = Client.objects.get(email=request.user.email)
+        
+    serializer = EventSerializer(data=request.data)
+    if serializer.is_valid():
+        # Salva o novo evento no banco de dados
+        serializer.save(client=client)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_user_events(request):
+    try:
+        client = Client.objects.get(email=request.user.email)
+    except Client.DoesNotExist:
+        return Response({"error": "Cliente associado ao usuário não encontrado."}, status=status.HTTP_400_BAD_REQUEST)
+        
+    events = Event.objects.filter(client=client)
+    serializer = EventSerializer(events, many=True)
+    return Response(serializer.data)
+

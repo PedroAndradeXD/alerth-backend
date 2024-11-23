@@ -30,6 +30,8 @@ class EventAdmin(admin.ModelAdmin):
 
     search_fields = ['event_id']
 
+    read_only_fields = ['client']
+
     def get_fields(self, request, obj=None):
         fields = super().get_fields(request, obj)
         if obj is None:
