@@ -23,6 +23,8 @@ urlpatterns = [
     path('login', views.login),
     path('signup', views.signup),
     path('test_token', views.test_token),
+    path('events/', views.create_event, name='create_event'),
+    path('user/events/', views.get_user_events, name='user-events'),
 
     path('', include(router.urls)),
 ]

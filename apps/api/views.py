@@ -1,20 +1,15 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import get_object_or_404
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework import permissions
+from rest_framework import permissions, status
 from rest_framework.response import Response
-
-from .serializers import ClientSerializer, ClientLoginSerializer, Client, EventSerializer
-from rest_framework import status
-from django.contrib.auth.models import User
 from rest_framework_simplejwt.tokens import RefreshToken
-from django.db.models import Q
 from django.contrib.auth.hashers import make_password
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from django.shortcuts import get_object_or_404
 
+from .models import Client, Event, Like
+from .serializers import ClientSerializer, ClientLoginSerializer, EventSerializer
 
-# Create your views here.
 
 def get_tokens_for_user(user):
     refresh = RefreshToken.for_user(user)
@@ -23,17 +18,15 @@ def get_tokens_for_user(user):
         'access': str(refresh.access_token),
     }
 
+
 @api_view(['POST'])
 @permission_classes((permissions.AllowAny,))
 def login(request):
     serializer = ClientLoginSerializer(data=request.data)
 
     if serializer.is_valid():
-        user = serializer.validated_data  # O usuário foi retornado como objeto do modelo User
-
-        # Gera os tokens para o usuário
+        user = serializer.validated_data
         tokens = get_tokens_for_user(user)
-
         return Response({
             "message": "Login bem-sucedido!",
             "user": {
@@ -43,9 +36,9 @@ def login(request):
             "tokens": tokens,
         })
 
-    # Em caso de erro, retorne as mensagens de erro
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)  
-    
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
 @api_view(['POST'])
 @permission_classes((permissions.AllowAny,))
 def signup(request):
@@ -53,63 +46,63 @@ def signup(request):
     email = request.data.get('email')
     password = request.data.get('password')
 
-    # Checando se o email já está cadastrado
     if User.objects.filter(email=email).exists():
         return Response({"error": "Email já cadastrado."}, status=status.HTTP_400_BAD_REQUEST)
 
-    # Criando o usuário
     user = User.objects.create(
-        username=email,  # Pode usar o email como username
+        username=email,
         email=email,
-        password=make_password(password)  # Usando make_password para hashear a senha
+        password=make_password(password)
     )
 
     client = Client.objects.create(
-        name=name, 
-        email=email)
-    
-    # Gerando tokens para o novo usuário
+        name=name,
+        email=email
+    )
+
+    user.client = client
+    user.save()
+
     tokens = get_tokens_for_user(user)
-
-    client_data = ClientSerializer(client).data
-
 
     return Response({
         "message": "Usuário criado com sucesso!",
-        "client": client_data,
-        "user": user.username,
-        "tokens": tokens
+        "client": ClientSerializer(client).data,
+        "tokens": tokens,
     }, status=status.HTTP_201_CREATED)
 
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
+
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated])
+def create_event(request):
+    client = get_object_or_404(Client, email=request.user.email)
+    serializer = EventSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save(client=client)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated]) 
-def test_token(request):
-    return Response({"message": "Acesso liberado para {}".format(request.user.email)})
+@permission_classes([permissions.IsAuthenticated])
+def get_user_events(request):
+    client = get_object_or_404(Client, email=request.user.email)
+    events = Event.objects.filter(client=client)
+    serializer = EventSerializer(events, many=True)
+    return Response(serializer.data)
+
 
 @csrf_exempt
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated])
 def like_event(request, event_id):
-    if request.method == "POST":
-        client_id = request.POST.get("client_id")
-        client = get_object_or_404(Client, pk=client_id)
-        event = get_object_or_404(Event, pk=event_id)
+    client = get_object_or_404(Client, email=request.user.email)
+    event = get_object_or_404(Event, pk=event_id)
 
-        # Verifica se o cliente já curtiu o evento
-        if event.user_liked(client):
-            return JsonResponse({"message": "Você já curtiu este evento!"}, status=400)
+    # Verifica se o cliente já curtiu o evento
+    if event.user_liked(client):
+        return JsonResponse({"message": "Você já curtiu este evento!"}, status=400)
 
-        # Cria a curtida
-        Like.objects.create(client=client, event=event)
-        return JsonResponse({"message": "Evento curtido com sucesso!"}, status=201)
-
-    return JsonResponse({"error": "Método não permitido."}, status=405)
-
-event = Event.objects.get(pk=event_id)
-print(event.like_count())
-
-client = ClientSerializer.objects.get(pk=client_id)
-event = EventSerializer.objects.get(pk=event_id)
-print(event.user_liked(client)) 
+    # Adiciona a curtida ao evento
+    Like.objects.create(client=client, event=event)
+    return JsonResponse({"message": "Evento curtido com sucesso!"}, status=201)
