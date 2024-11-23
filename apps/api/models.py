@@ -95,6 +95,12 @@ class Event(models.Model):
         return f"{self.service_category} - {self.reports_number} reports"
 
 
+    def like_count(self):
+        return Like.objects.filter(event=self).count()
+
+    def user_liked(self, client):
+        return Like.objects.filter(event=self, client=client).exists()
+
 
 class ClientEvent(models.Model):
     client_event_id = models.UUIDField(primary_key=True, default=uuid4)
@@ -142,3 +148,16 @@ class Comment(models.Model):
 
     def __str__(self):
         return self.comment
+
+class Like(models.Model):
+    like_id = models.UUIDField(primary_key=True, default=uuid4)
+    client = models.ForeignKey(Client, on_delete=models.CASCADE)
+    event = models.ForeignKey(Event, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('client', 'event')  # Garante que um cliente só possa curtir um evento uma vez.
+
+    def __str__(self):
+        return f'{self.client.name} liked {self.event.service_category.category}'
+

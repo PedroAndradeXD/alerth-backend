@@ -121,3 +121,13 @@ class CommentsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
         fields = ['comment_id', 'client', 'event', 'comment']
+
+
+class LikeSerializer(serializers.ModelSerializer):
+    client_name = serializers.CharField(source='client.name', read_only=True)
+    event_category = serializers.CharField(source='event.service_category.category', read_only=True)
+
+    class Meta:
+        model = Like
+        fields = ['like_id', 'client', 'client_name', 'event', 'event_category', 'created_at']
+        read_only_fields = ['like_id', 'created_at']
