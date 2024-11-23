@@ -9,6 +9,8 @@ from django.views.decorators.csrf import csrf_exempt
 
 from .models import Client, Event, Like
 from .serializers import ClientSerializer, ClientLoginSerializer, EventSerializer
+from django.contrib.auth.models import User
+
 
 
 def get_tokens_for_user(user):
@@ -70,6 +72,12 @@ def signup(request):
         "client": ClientSerializer(client).data,
         "tokens": tokens,
     }, status=status.HTTP_201_CREATED)
+
+
+@api_view(['GET'])
+@permission_classes([permissions.IsAuthenticated])
+def test_token(request):
+    return Response({"message": f"Acesso liberado para {request.user.email}"})
 
 
 @api_view(['POST'])

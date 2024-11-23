@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Client, Event, ClientEvent, Item, Purchase, ServiceCategory, ServiceEntity, EntityCategory, Comment
+from .models import Client, Event, ClientEvent, Item, Purchase, ServiceCategory, ServiceEntity, EntityCategory, Comment, Like
 from .validators import EmailValidator, PositiveValueValidator, ClientNameValidator
 from django.contrib.auth.models import User
 from django.db.models import Q
