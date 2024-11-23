@@ -3,12 +3,15 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework import permissions
 from rest_framework.response import Response
 
-from .serializers import ClientSerializer, ClientLoginSerializer, Client
+from .serializers import ClientSerializer, ClientLoginSerializer, Client, EventSerializer
 from rest_framework import status
 from django.contrib.auth.models import User
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.db.models import Q
 from django.contrib.auth.hashers import make_password
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.shortcuts import get_object_or_404
 
 
 # Create your views here.
@@ -86,3 +89,27 @@ from rest_framework.response import Response
 @permission_classes([IsAuthenticated]) 
 def test_token(request):
     return Response({"message": "Acesso liberado para {}".format(request.user.email)})
+
+@csrf_exempt
+def like_event(request, event_id):
+    if request.method == "POST":
+        client_id = request.POST.get("client_id")
+        client = get_object_or_404(Client, pk=client_id)
+        event = get_object_or_404(Event, pk=event_id)
+
+        # Verifica se o cliente já curtiu o evento
+        if event.user_liked(client):
+            return JsonResponse({"message": "Você já curtiu este evento!"}, status=400)
+
+        # Cria a curtida
+        Like.objects.create(client=client, event=event)
+        return JsonResponse({"message": "Evento curtido com sucesso!"}, status=201)
+
+    return JsonResponse({"error": "Método não permitido."}, status=405)
+
+event = Event.objects.get(pk=event_id)
+print(event.like_count())
+
+client = ClientSerializer.objects.get(pk=client_id)
+event = EventSerializer.objects.get(pk=event_id)
+print(event.user_liked(client)) 
